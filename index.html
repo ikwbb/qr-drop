@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- The page may not fetch, upload or embed anything from anywhere. Files only move over the WebRTC data channel. -->
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="no-referrer">
+  <title>QR Drop</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <header>
+      <h1>QR Drop</h1>
+      <p class="tagline">Send a file straight from one device to another. The QR code carries the key, the file goes over WebRTC, and nothing in between ever holds a readable copy.</p>
+    </header>
+
+    <!-- Sender -->
+    <section id="send" hidden>
+      <div class="step" id="send-pick">
+        <h2><span class="num">1</span> Pick a file</h2>
+        <label class="drop" id="drop">
+          <input type="file" id="file">
+          <span id="drop-label">Choose a file or drop it here</span>
+        </label>
+      </div>
+
+      <div class="step" id="send-offer" hidden>
+        <h2><span class="num">2</span> Scan this on the receiving device</h2>
+        <p class="hint">Open the phone's camera and point it at the code, or send the link some other way. The key is in the part after <code>#</code>, which is never sent to any server.</p>
+        <canvas id="offer-qr" class="qr"></canvas>
+        <div class="row">
+          <button id="copy-link" type="button">Copy link</button>
+        </div>
+      </div>
+
+      <div class="step" id="send-answer" hidden>
+        <h2><span class="num">3</span> Scan the reply code from the receiver</h2>
+        <div class="row">
+          <button id="scan-answer" type="button" class="primary">Scan with camera</button>
+        </div>
+        <div class="scanner" id="scanner" hidden>
+          <video id="video" playsinline muted></video>
+          <button id="stop-scan" type="button">Stop camera</button>
+        </div>
+        <details>
+          <summary>No camera? Paste the reply text</summary>
+          <textarea id="answer-text" rows="3" placeholder="Paste the reply text from the receiver"></textarea>
+          <button id="use-answer" type="button">Connect</button>
+        </details>
+      </div>
+    </section>
+
+    <!-- Receiver -->
+    <section id="recv" hidden>
+      <div class="step" id="recv-answer">
+        <h2>Show this reply code to the sender</h2>
+        <p class="hint">The sender scans it with their camera to finish connecting. Keep this page open.</p>
+        <p class="status" id="recv-wait">Preparing reply…</p>
+        <canvas id="answer-qr" class="qr" hidden></canvas>
+        <div class="row">
+          <button id="copy-answer" type="button" hidden>Copy reply text</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Shared transfer view -->
+    <section id="transfer" hidden>
+      <div class="step">
+        <h2 id="t-title">Transferring</h2>
+        <p class="file-name" id="t-name"></p>
+        <progress id="t-bar" max="1" value="0"></progress>
+        <p class="status" id="t-status"></p>
+        <a id="t-save" class="button primary" hidden>Save file</a>
+      </div>
+    </section>
+
+    <p class="error" id="error" role="alert" hidden></p>
+
+    <footer>
+      <p>Static page, no server. Connection details travel in the QR codes, and every chunk is encrypted with AES-256-GCM using the key from the first QR code. <a href="https://github.com/" id="source-link">Source</a></p>
+    </footer>
+  </main>
+
+  <script src="vendor/qrcode.js"></script>
+  <script src="vendor/jsQR.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
